@@ -1,10 +1,24 @@
 from django.shortcuts import render, redirect, HttpResponse
-from .forms import LoginForm, OTPForm, ProfileForm
+from .forms import LoginForm, OTPForm, ProfileForm, RegisterForm
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login, logout
 import random
 from .models import UserOTP, Profile
 from django.contrib.auth.models import User
+
+
+def register(request):
+    if request.method == "POST":
+        form = RegisterForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('login')
+    else:
+        form = RegisterForm()
+    return render(request, 'accounts/register.html', {'form': form})
+
+
+
 
 
 def login_view(request):
@@ -34,19 +48,17 @@ def login_view(request):
     else:
         form = LoginForm()
 
-    return render(request, 'login.html', {'form': form})
+    return render(request, 'accounts/login.html', {'form': form})
 
-
+@login_required
+def logout_view(request):
+    logout(request)
+    return redirect('login')
 
 
 @login_required
 def home_view(request):
     return render(request, 'home.html')
-
-
-def logout_view(request):
-    logout(request)
-    return redirect('login')
 
 
 def otp_view(request):
@@ -64,7 +76,7 @@ def otp_view(request):
                 user_otp.save()
                 login(request,user)
                 del request.session['pre_otp_user_id']
-                return redirect('home')
+                return render(request, 'home/index.html')
             else:
                 form.add_error('otp', 'Invalid OTP')
     else:
@@ -87,4 +99,30 @@ def profile_update(request):
     else:
         form = ProfileForm(instance=profile)
 
-    return render(request, 'profile_update.html', {'form': form})
+    return render(request, 'home/page-user.html', {'form': form})
+
+
+
+def tabile_list(requset):
+    return render(requset, 'home/ui-tables.html')
+
+
+def typography_views(request):
+    return render(request,'home/ui-typography.html')
+
+
+
+def icon_views(request):
+    return render(request, 'home/ui-icons.html')
+
+
+def maps_views(request):
+    return render(request, 'home/ui-maps.html')
+
+
+def notifications_views(request):
+    return render(request, 'home/ui-notifications.html')
+
+
+def rtl_support_views(request):
+    return render(request, 'home/page-rtl-support.html')
